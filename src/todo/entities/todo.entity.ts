@@ -1,4 +1,11 @@
-import { Table, Column, Model } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  BelongsTo,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { User } from 'src/users/entities/user.entity';
 
 @Table
 export class Todo extends Model {
@@ -10,4 +17,11 @@ export class Todo extends Model {
 
   @Column({})
   isDone: boolean;
+
+  @ForeignKey(() => User)
+  @Column
+  belongsTo: string;
+
+  @BelongsTo(() => User)
+  user: User;
 }

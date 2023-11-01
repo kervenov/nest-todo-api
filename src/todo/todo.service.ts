@@ -9,26 +9,32 @@ export class TodoService {
     private todoRepository: typeof Todo,
   ) {}
 
-  async findAll(): Promise<Todo[]> {
-    return this.todoRepository.findAll();
+  async findAll(request): Promise<Todo[]> {
+    const options = {
+      where: { belongsTo: request.id },
+      order: ['createdAt'],
+    };
+
+    return this.todoRepository.findAll(options);
   }
-  async createTask(createTodoDto: CreateTodoDto) {
+  async createTask(createTodoDto: CreateTodoDto, request) {
     const newTask = await this.todoRepository.create({
       taskId: `task-${uuidv4()}`,
       task: createTodoDto.task,
       isDone: false,
+      belongsTo: request['id'],
     });
     return newTask;
   }
-  async update(requiredId: number) {
+  async update(id) {
     const task = await this.todoRepository.findOne({
-      where: { taskId: requiredId },
+      where: { taskId: id },
     });
     task.isDone = !task.isDone;
     task.save();
     return task;
   }
-  async remove(id: number) {
+  async remove(id) {
     const task = await this.todoRepository.findOne({
       where: { taskId: id },
     });
@@ -36,9 +42,5 @@ export class TodoService {
       task.destroy();
       task.save();
     }
-  }
-  async format() {
-    await this.todoRepository.destroy({ where: {} });
-    return 'formatted succesfully!';
   }
 }

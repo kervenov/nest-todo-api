@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize-typescript';
 import { Todo } from 'src/todo/entities/todo.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export const databaseProviders = [
   {
@@ -12,8 +13,9 @@ export const databaseProviders = [
         username: 'kakamyrat',
         password: 'admin',
         database: 'todos',
+        logging: false,
       });
-      sequelize.addModels([Todo]);
+      sequelize.addModels([Todo, User]);
       await sequelize.sync({ alter: true });
       return sequelize;
     },

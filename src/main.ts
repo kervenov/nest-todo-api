@@ -6,10 +6,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
-    .setTitle('ToDo list api')
-    .setDescription('The cats API description')
+    .setTitle('Todo list api')
+    .setDescription('The TODO API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addSecurity('token', {
+      type: 'apiKey',
+      scheme: 'Bearer',
+      in: 'header',
+      name: 'authorization',
+    })
+    .addTag('Todo-List-Api')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
