@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Todo } from './entities/todo.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,17 +14,35 @@ export class TodoService {
       where: { belongsTo: request.id },
       order: ['createdAt'],
     };
-
-    return this.todoRepository.findAll(options);
+    try {
+      const tasks = await this.todoRepository.findAll(options);
+      return tasks;
+    } catch {
+      throw new HttpException('Can not fetch!', HttpStatus.NOT_FOUND);
+    }
   }
   async createTask(createTodoDto: CreateTodoDto, request) {
-    const newTask = await this.todoRepository.create({
-      taskId: `task-${uuidv4()}`,
-      task: createTodoDto.task,
-      isDone: false,
-      belongsTo: request['id'],
-    });
-    return newTask;
+    if (!createTodoDto.task) {
+      throw new HttpException('Fill all fields', HttpStatus.NOT_ACCEPTABLE);
+    }
+    try {
+      const newTask = await this.todoRepository
+        .create({
+          taskId: `task-${uuidv4()}`,
+          task: createTodoDto.task,
+          isDone: false,
+          belongsTo: request['id'],
+        })
+        .catch(() => {
+          throw new HttpException('Not Created!', HttpStatus.CONFLICT);
+        });
+      return newTask;
+    } catch (error) {
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
   async update(id) {
     const task = await this.todoRepository.findOne({

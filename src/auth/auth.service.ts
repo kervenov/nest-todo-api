@@ -1,53 +1,86 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import * as uniqid from 'uniqid';
+import { Todo } from 'src/todo/entities/todo.entity';
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: typeof User,
+    @Inject('TODO_REPOSITORY')
+    private todoRepository: typeof Todo,
     private jwtService: JwtService,
   ) {}
-
-  async login(body: LoginUserDto) {
-    try {
-      const { username, password } = body;
-      const user = await this.userRepository.findOne({
-        where: { username },
-      });
-      if (!user) {
-        throw new Error('User not found');
-      }
-      if (await bcrypt.compare(password, user.password)) {
-        // Generate a token
-        const token = this.generateToken(user);
-
-        // Return the token and the user object
-        return { access_token: token };
-      } else {
-        throw new Error('Wrong password or username!');
-      }
-    } catch (error) {
-      return Error(error.message);
-    }
+  async deleteAll() {
+    await this.userRepository.destroy({ where: {} });
+    await this.todoRepository.destroy({ where: {} });
+    return 'Deleted succesfully!!!';
   }
-  async createUser(body: CreateUserDto, request) {
+  async login(body: LoginUserDto) {
     const { username, password } = body;
+
     try {
-      const newUser = await this.userRepository.create({
-        uuid: uniqid('user-'),
-        username: username,
-        belongsTo: request['id'],
-        password: await bcrypt.hash(password, 10),
+      if (!username || !password) {
+        throw new HttpException('Fill all fields', HttpStatus.NOT_ACCEPTABLE);
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { username: username },
       });
-      const token = this.generateToken(newUser);
+
+      if (!user) {
+        throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        throw new HttpException(
+          'Wrong password or username!',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const token = this.generateToken(user);
       return { access_token: token };
     } catch (error) {
-      return new Error('Could not create the user!');
+      if (error instanceof HttpException) {
+        // Handle specific HttpException errors
+        console.error(`HttpException: ${error.message}`);
+        return error;
+      } else {
+        // Handle other types of errors
+        console.error(`Unexpected error: ${error.message}`);
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+  async createUser(body: CreateUserDto) {
+    const { username, password } = body;
+    if (!username || !password) {
+      throw new HttpException('Fill all fields', HttpStatus.NOT_ACCEPTABLE);
+    }
+    try {
+      const newUser = await this.userRepository
+        .create({
+          uuid: uniqid('user-'),
+          username: username,
+          password: await bcrypt.hash(password, 10),
+        })
+        .catch(() => {
+          throw new HttpException('Not Created!', HttpStatus.CONFLICT);
+        });
+      const token = this.generateToken(newUser);
+      return { access_token: token };
+    } catch {
+      throw new HttpException('Not Created!', HttpStatus.CONFLICT);
     }
   }
   private generateToken(user: User) {

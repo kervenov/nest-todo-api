@@ -10,10 +10,8 @@ async function bootstrap() {
     .setDescription('The TODO API description')
     .setVersion('1.0')
     .addSecurity('token', {
-      type: 'apiKey',
-      scheme: 'Bearer',
-      in: 'header',
-      name: 'authorization',
+      type: 'http',
+      scheme: 'bearer',
     })
     .addTag('Todo-List-Api')
     .build();
