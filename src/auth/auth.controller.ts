@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -8,10 +8,6 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-  @Delete('deleteAll')
-  deleteAll() {
-    return this.authService.deleteAll();
-  }
   @ApiResponse({
     description: 'OK',
     status: HttpStatus.OK,

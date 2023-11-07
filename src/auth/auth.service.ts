@@ -5,21 +5,13 @@ import { User } from 'src/users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import * as uniqid from 'uniqid';
-import { Todo } from 'src/todo/entities/todo.entity';
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: typeof User,
-    @Inject('TODO_REPOSITORY')
-    private todoRepository: typeof Todo,
     private jwtService: JwtService,
   ) {}
-  async deleteAll() {
-    await this.userRepository.destroy({ where: {} });
-    await this.todoRepository.destroy({ where: {} });
-    return 'Deleted succesfully!!!';
-  }
   async login(body: LoginUserDto) {
     const { username, password } = body;
 
