@@ -41,11 +41,8 @@ export class AuthService {
       return { access_token: token };
     } catch (error) {
       if (error instanceof HttpException) {
-        // Handle specific HttpException errors
-        console.error(`HttpException: ${error.message}`);
         return error;
       } else {
-        // Handle other types of errors
         console.error(`Unexpected error: ${error.message}`);
         throw new HttpException(
           'Internal Server Error',

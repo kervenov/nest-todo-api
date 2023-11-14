@@ -18,12 +18,18 @@ export class TodoService {
       const tasks = await this.todoRepository.findAll(options);
       return tasks;
     } catch {
-      throw new HttpException('Can not fetch!', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'The requested resource(s) could not be found.',
+        HttpStatus.NOT_FOUND,
+      );
     }
   }
   async createTask(createTodoDto: CreateTodoDto, request) {
     if (!createTodoDto.task) {
-      throw new HttpException('Fill all fields', HttpStatus.NOT_ACCEPTABLE);
+      throw new HttpException(
+        'The requested content format is not supported. Please try a different format.',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
     try {
       const newTask = await this.todoRepository
@@ -34,12 +40,15 @@ export class TodoService {
           belongsTo: request['id'],
         })
         .catch(() => {
-          throw new HttpException('Not Created!', HttpStatus.CONFLICT);
+          throw new HttpException(
+            'The request could not be completed due to a conflict with the current state of the target resource.',
+            HttpStatus.CONFLICT,
+          );
         });
       return newTask;
     } catch (error) {
       throw new HttpException(
-        'Internal Server Error',
+        `An unexpected error occurred on the server: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
