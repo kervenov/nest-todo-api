@@ -53,6 +53,22 @@ export class TodoService {
       );
     }
   }
+  async modify(body: CreateTodoDto, id: string) {
+    if (!body || !id) {
+      throw new HttpException('Fill all fields!', HttpStatus.NOT_ACCEPTABLE);
+    } else {
+      const task = await this.todoRepository.findOne({
+        where: { taskId: id },
+      });
+      if (task) {
+        task.task = body.task;
+        task.save();
+        return task;
+      } else {
+        throw new HttpException('Task could not found!', HttpStatus.NOT_FOUND);
+      }
+    }
+  }
   async update(id) {
     const task = await this.todoRepository.findOne({
       where: { taskId: id },
@@ -60,6 +76,14 @@ export class TodoService {
     task.isDone = !task.isDone;
     task.save();
     return task;
+  }
+  async findOne(id: string) {
+    const task = await this.todoRepository.findOne({ where: { taskId: id } });
+    if (task) {
+      return task;
+    } else {
+      throw new HttpException('Task could not be found', HttpStatus.NOT_FOUND);
+    }
   }
   async remove(id) {
     const task = await this.todoRepository.findOne({
@@ -69,5 +93,6 @@ export class TodoService {
       task.destroy();
       task.save();
     }
+    return { message: 'Deleted succesfully' };
   }
 }

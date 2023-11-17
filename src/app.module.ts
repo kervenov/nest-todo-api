@@ -10,6 +10,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersService } from './users/users.service';
 import { userProviders } from './users/user.providers';
 import { JwtModule } from '@nestjs/jwt';
+import { todoProviders } from './todo/todo.providers';
 
 @Module({
   imports: [
@@ -23,6 +24,12 @@ import { JwtModule } from '@nestjs/jwt';
     DatabaseModule,
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, UsersService, ...userProviders],
+  providers: [
+    AppService,
+    AuthService,
+    UsersService,
+    ...userProviders,
+    ...todoProviders,
+  ],
 })
 export class AppModule {}

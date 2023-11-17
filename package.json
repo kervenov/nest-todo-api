@@ -30,6 +30,7 @@
     "class-validator": "^0.14.0",
     "express": "^4.18.2",
     "install": "^0.13.0",
+    "morgan": "^1.10.0",
     "node-pre-gyp": "^0.17.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
@@ -37,6 +38,7 @@
     "sequelize-typescript": "^2.1.5",
     "sh": "^0.0.3",
     "uniqid": "^5.4.0",
+    "versioning": "^1.1.2",
     "yarn": "^1.22.19"
   },
   "devDependencies": {
